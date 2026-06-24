@@ -240,7 +240,7 @@
         const LOCAL_STORAGE_KEY = 'fpdu_oncall_logs_v1';
         
         // ADMIN CONFIGURATION PASSWORD PIN (Boleh ditukar sesuka hati di sini)
-        const ADMIN_PASSCODE = 'FPDU1234';
+        const ADMIN_PASSCODE = '1234';
 
         let logData = [];
         let editId = null; // Tracks index for editing item
@@ -548,7 +548,7 @@
             const enteredPasscode = document.getElementById('adminPasswordInput').value;
             
             // Check passcode verification
-            if (enteredPasscode !== 1234) {
+            if (enteredPasscode !== ADMIN_PASSCODE) {
                 showToast("Ralat: Kata laluan admin tidak sah!", true);
                 return;
             }
