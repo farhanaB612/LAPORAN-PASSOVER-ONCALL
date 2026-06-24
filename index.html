@@ -77,7 +77,7 @@
             </div>
         </header>
 
-        <!-- SLEEK CUSTOM MODAL FOR MONTHLY RESET CONFIRMATION -->
+        <!-- SLEEK CUSTOM MODAL FOR MONTHLY RESET CONFIRMATION (WITH PASSWORD AUTHENTICATION) -->
         <div id="resetModal" class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
             <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-4 animate-fade-in">
                 <div class="flex items-center gap-3 text-red-600">
@@ -91,12 +91,19 @@
                 <p class="text-sm text-slate-500 leading-relaxed">
                     Tindakan ini akan <strong>memadamkan kesemua rekod log aktif</strong> bagi bulan semasa. Sila pastikan anda telah memuat turun laporan (.CSV) sebelum meneruskan.
                 </p>
+                
+                <!-- Password Authentication Input -->
+                <div class="space-y-1.5 pt-2">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Sahkan Kata Laluan Admin</label>
+                    <input type="password" id="adminPasswordInput" class="w-full border border-slate-200 rounded-xl p-3 bg-slate-50 text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:outline-none transition-all" placeholder="Masukkan kata laluan admin">
+                </div>
+
                 <div class="flex justify-end gap-3 pt-2">
                     <button onclick="closeResetModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition cursor-pointer">
                         Batal
                     </button>
                     <button onclick="confirmResetLog()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition shadow-lg shadow-red-600/10 cursor-pointer">
-                        Ya, Padam Semua
+                        Sahkan & Padam Semua
                     </button>
                 </div>
             </div>
@@ -104,7 +111,7 @@
 
         <!-- SLEEK CUSTOM TOAST NOTIFICATION CONTAINER -->
         <div id="toastNotification" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-sm px-4 py-3.5 rounded-xl shadow-xl border border-slate-800 flex items-center gap-3 translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span id="toastBullet" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
             <span id="toastMessage">Tindakan Berjaya!</span>
         </div>
 
@@ -196,17 +203,17 @@
 
         </div>
 
-        <!-- NEWLY ADDED: EMPHASIZED ADMIN ZONE (AT THE END OF THE WEBSITE) -->
-        <div class="bg-slate-150 border border-slate-200 p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-12 shadow-sm">
+        <!-- EMPHASIZED ADMIN ZONE (AT THE END OF THE WEBSITE) -->
+        <div class="bg-slate-100 border border-slate-200 p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-12 shadow-sm">
             <div class="space-y-1">
                 <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
                     <svg class="w-4.5 h-4.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
                     </svg>
-                    Panel Pengurusan Akhir Bulan (Admin FPDU)
+                    Panel Pengurusan Akhir Bulan (Admin FPDU Only)
                 </h3>
                 <p class="text-xs text-slate-500 max-w-2xl leading-relaxed">
-                    Sila tatal ke sini pada hujung bulan sahaja untuk mengosongkan rekod. Sila pastikan anda telah memuat turun salinan laporan (.CSV) di bahagian atas halaman sebelum menekan butang padam.
+                    Sila tatal ke sini pada hujung bulan sahaja untuk mengosongkan rekod. Sila pastikan anda telah memuat turun salinan laporan (.CSV) di bahagian atas halaman sebelum menekan butang padam. Tindakan ini memerlukan kata laluan pengesahan admin.
                 </p>
             </div>
             <button onclick="openResetModal()" class="w-full md:w-auto px-5 py-3 bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800 text-xs font-bold uppercase tracking-wider rounded-xl border border-red-200/80 transition shadow-sm hover:shadow flex items-center justify-center gap-2 cursor-pointer shrink-0">
@@ -231,6 +238,10 @@
     <script>
         // LocalStorage initialization & data arrays
         const LOCAL_STORAGE_KEY = 'fpdu_oncall_logs_v1';
+        
+        // ADMIN CONFIGURATION PASSWORD PIN (Boleh ditukar sesuka hati di sini)
+        const ADMIN_PASSCODE = 'FPDU1234';
+
         let logData = [];
         let editId = null; // Tracks index for editing item
 
@@ -456,15 +467,18 @@
         function showToast(message, isWarning = false) {
             const existing = document.getElementById('toastNotification');
             const messageEl = document.getElementById('toastMessage');
+            const bulletEl = document.getElementById('toastBullet');
             
             messageEl.innerText = message;
             
             if (isWarning) {
                 existing.classList.remove('bg-slate-900');
                 existing.classList.add('bg-red-950', 'border-red-800');
+                bulletEl.className = "w-2.5 h-2.5 rounded-full bg-red-400";
             } else {
                 existing.classList.remove('bg-red-950', 'border-red-800');
                 existing.classList.add('bg-slate-900', 'border-slate-800');
+                bulletEl.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
             }
 
             // Animate toast entry
@@ -519,6 +533,8 @@
 
         // CUSTOM SLEEK CONFIRMATION DIALOG MODAL CONTROLLERS
         function openResetModal() {
+            // Reset input field first
+            document.getElementById('adminPasswordInput').value = '';
             document.getElementById('resetModal').classList.remove('hidden');
         }
 
@@ -529,6 +545,14 @@
 
         // Action Reset Data
         function confirmResetLog() {
+            const enteredPasscode = document.getElementById('adminPasswordInput').value;
+            
+            // Check passcode verification
+            if (enteredPasscode !== 1234) {
+                showToast("Ralat: Kata laluan admin tidak sah!", true);
+                return;
+            }
+
             editId = null;
             document.getElementById('passoverForm').reset();
             document.getElementById('submitBtn').innerText = "Simpan Log Shift";
