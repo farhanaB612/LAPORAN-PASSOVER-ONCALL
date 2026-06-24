@@ -169,13 +169,14 @@
                         <p class="text-xs text-slate-400 mt-0.5">Senarai rekod penyerahan bagi bulan semasa (Maksimum 30/31 hari).</p>
                     </div>
                     <div class="flex items-center gap-2.5">
+                        <span class="lg:hidden text-[10px] bg-slate-100 text-slate-500 px-2.5 py-1.5 rounded-md font-medium border border-slate-200/40">Sental ke kanan untuk lihat penuh ➔</span>
                         <span class="text-xs bg-indigo-50/80 text-indigo-700 border border-indigo-100 px-3.5 py-1.5 rounded-full font-semibold shadow-sm" id="rowCount">0 Rekod Wujud</span>
                     </div>
                 </div>
 
-                <!-- High-Density Scrollable Table Workspace -->
+                <!-- High-Density Scrollable Table Workspace (Responsive Horizontal Scroll Activated) -->
                 <div class="overflow-x-auto flex-grow max-h-[560px] rounded-xl border border-slate-100">
-                    <table id="logTable" class="w-full text-left border-collapse text-xs md:text-sm table-fixed">
+                    <table id="logTable" class="w-full min-w-[1000px] text-left border-collapse text-xs md:text-sm table-fixed">
                         <thead class="sticky top-0 bg-slate-50 text-slate-500 uppercase text-[10px] md:text-xs tracking-wider font-bold z-10 border-b border-slate-200/80">
                             <tr>
                                 <th class="p-4 bg-slate-50 w-[12%]">Section</th>
@@ -183,7 +184,7 @@
                                 <th class="p-4 bg-slate-50 w-[16%]">Passover From</th>
                                 <th class="p-4 bg-slate-50 w-[16%]">Received By</th>
                                 <th class="p-4 bg-slate-50 w-[38%]">Passover Notes</th>
-                                <th class="p-4 bg-slate-50 text-center w-[5%]">Tindakan</th>
+                                <th class="p-4 bg-slate-50 w-[5%]"></th>
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="divide-y divide-slate-100">
@@ -199,7 +200,7 @@
         <div class="bg-slate-100 border border-slate-200 p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-12 shadow-sm">
             <div class="space-y-1">
                 <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                    <svg class="w-4.5 h-4.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
                     </svg>
                     Panel Pengurusan Akhir Bulan (Admin FPDU Only)
@@ -310,7 +311,7 @@
                 const isRoutine = item.notes.toLowerCase() === "no passover";
 
                 const row = document.createElement('tr');
-                row.className = `transition-colors duration-150 ${editId === item.id ? 'bg-blue-50/50 hover:bg-blue-50/70' : 'hover:bg-slate-50/60'}`;
+                row.className = `transition-colors duration-150 ${editId == item.id ? 'bg-blue-50/50 hover:bg-blue-50/70' : 'hover:bg-slate-50/60'}`;
 
                 let notesMarkup = "";
                 if(isRoutine) {
@@ -329,9 +330,9 @@
                     <td class="p-4 break-words ${isRoutine ? 'text-slate-500' : 'text-slate-700'}">${item.receivedBy}</td>
                     ${notesMarkup}
                     <td class="p-4 text-center whitespace-nowrap">
-                        <!-- EDIT BUTTON ONLY (Individual Delete Button Removed as Requested) -->
+                        <!-- EDIT BUTTON ONLY (Standard Tailwind w-5 h-5 sizing fixed) -->
                         <button onclick="editRow(${item.id})" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer inline-block" title="Kemaskini Rekod">
-                            <svg class="w-4.5 h-4.5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
                         </button>
@@ -346,7 +347,7 @@
 
         // Populate inputs for editing row
         function editRow(id) {
-            const item = logData.find(x => x.id === id);
+            const item = logData.find(x => x.id == id);
             if (!item) return;
 
             editId = id;
@@ -397,7 +398,7 @@
 
             if (editId !== null) {
                 // UPDATE PIPELINE
-                const index = logData.findIndex(item => item.id === editId);
+                const index = logData.findIndex(item => item.id == editId);
                 if (index !== -1) {
                     logData[index].section = section;
                     logData[index].dateTime = dateTime;
@@ -443,10 +444,10 @@
 
         // Individual row deletion logic (Kept in script but hidden from daily user UI)
         function deleteRow(id) {
-            if (editId === id) {
+            if (editId == id) {
                 cancelEditMode();
             }
-            logData = logData.filter(item => item.id !== id);
+            logData = logData.filter(item => item.id != id);
             saveToLocalStorage();
             renderTable();
             showToast("Rekod berjaya dipadam.", true);
